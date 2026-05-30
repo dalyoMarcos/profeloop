@@ -1,0 +1,27 @@
+{% extends "_shell.html" %}
+{% block title %}Publicar material · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>📤 Publicar material</h1><p>Compartilhe conhecimento com a comunidade.</p></div></div>
+<form class="card" method="post" enctype="multipart/form-data" style="max-width:760px">
+  <label>Título *</label><input name="title" required>
+  <label>Descrição</label><textarea name="description"></textarea>
+  <div class="grid-2">
+    <div><label>Disciplina</label>
+      <select name="subject">{% for s in subjects %}<option>{{s}}</option>{% endfor %}</select></div>
+    <div><label>Série / Turma</label>
+      <select name="grade">{% for g in grades %}<option>{{g}}</option>{% endfor %}</select></div>
+  </div>
+  <div class="grid-2">
+    <div><label>Tipo de conteúdo</label>
+      <select name="kind">{% for k in kinds %}<option>{{k}}</option>{% endfor %}</select></div>
+    <div><label>Tags (separadas por vírgula)</label>
+      <input name="tags" placeholder="ex: equação, 2º grau, exercícios"></div>
+  </div>
+  <label>Arquivo *</label><input type="file" name="file" required>
+  <p style="color:var(--muted);font-size:13px">PDF, slides, imagens, vídeos, documentos. Máx 64 MB.</p>
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <a class="btn" href="{{ url_for('library') }}">Cancelar</a>
+    <button class="btn btn-primary">Publicar</button>
+  </div>
+</form>
+{% endblock %}

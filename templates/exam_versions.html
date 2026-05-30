@@ -1,0 +1,31 @@
+{% extends "_shell.html" %}
+{% block title %}Versões · {{ exam.title }}{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>📄 Versões geradas</h1><p>{{ exam.title }} — {{ exam.subject or '' }}</p></div>
+  <div style="display:flex;gap:10px">
+    <a class="btn" href="{{ url_for('exam_edit', eid=exam.id) }}">Editar prova</a>
+    <a class="btn btn-primary" href="{{ url_for('scan_page') }}">📸 Corrigir gabarito</a>
+  </div>
+</div>
+
+{% if exam.versions %}
+<div class="grid-3">
+  {% for v in exam.versions %}
+  <div class="card">
+    <span class="badge">Versão {{ v.label }}</span>
+    <h3 style="margin:10px 0 4px">{{ exam.title }}</h3>
+    <p style="color:var(--muted);font-size:13px;margin:0">
+      Gerada em {{ v.created_at.strftime('%d/%m/%Y %H:%M') }}<br>
+      {{ v.attempts|length }} correções registradas
+    </p>
+    <a class="btn btn-primary btn-block" style="margin-top:14px"
+       href="{{ url_for('exam_version_pdf', vid=v.id) }}">⬇ Baixar PDF</a>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty"><div class="em-ic">📄</div>Nenhuma versão gerada ainda.
+  <a href="{{ url_for('exam_edit', eid=exam.id) }}">Voltar e gerar</a>.</div>
+{% endif %}
+{% endblock %}

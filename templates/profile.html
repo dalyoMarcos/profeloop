@@ -1,0 +1,21 @@
+{% extends "_shell.html" %}
+{% block title %}Perfil · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>👤 Meu perfil</h1><p>Mantenha suas informações atualizadas.</p></div></div>
+<form class="card" method="post" style="max-width:680px">
+  <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px">
+    <div class="avatar" style="width:64px;height:64px;font-size:24px">{{ current_user.name[:1]|upper }}</div>
+    <div><h3 style="margin:0">{{ current_user.name }}</h3>
+      <p style="margin:0;color:var(--muted);font-size:13px">{{ current_user.email }}</p></div>
+  </div>
+  <label>Nome</label><input name="name" value="{{ current_user.name }}">
+  <div class="grid-2">
+    <div><label>Escola</label><input name="school" value="{{ current_user.school or '' }}"></div>
+    <div><label>Disciplina principal</label>
+      <select name="subject"><option value="">—</option>
+        {% for s in subjects %}<option {% if current_user.subject==s %}selected{% endif %}>{{s}}</option>{% endfor %}</select></div>
+  </div>
+  <label>Bio</label><textarea name="bio">{{ current_user.bio or '' }}</textarea>
+  <button class="btn btn-primary" style="margin-top:14px">Salvar alterações</button>
+</form>
+{% endblock %}

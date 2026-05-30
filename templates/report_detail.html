@@ -1,0 +1,7 @@
+{% extends "_shell.html" %}
+{% block content %}
+<h1>Relatório: {{ exam.title }}</h1>
+<p>{{ total_attempts }} correções registradas.</p>
+<div class="card"><h3>Questões mais erradas</h3>
+<ol>{% for w in wrong_per_q %}<li>Q{{ loop.index }} — {{ w }} erros</li>{% endfor %}</ol></div>
+{% endblock %}

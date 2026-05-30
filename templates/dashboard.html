@@ -1,0 +1,86 @@
+{% extends "_shell.html" %}
+{% block title %}Dashboard · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1>Olá, {{ current_user.name.split()[0] }} 👋</h1>
+    <p>Aqui está um resumo da sua atividade.</p>
+  </div>
+  <div style="display:flex; gap:10px">
+    <a class="btn" href="{{ url_for('library_upload') }}">📤 Publicar material</a>
+    <a class="btn btn-primary" href="{{ url_for('exam_new') }}">➕ Criar prova</a>
+  </div>
+</div>
+
+<div class="grid-4">
+  <div class="card stat"><span class="label">Provas criadas</span><span class="num">{{ stats.exams }}</span><span class="delta">no banco</span></div>
+  <div class="card stat"><span class="label">Materiais publicados</span><span class="num">{{ stats.contents }}</span><span class="delta">na biblioteca</span></div>
+  <div class="card stat"><span class="label">Downloads recebidos</span><span class="num">{{ stats.downloads }}</span><span class="delta">total</span></div>
+  <div class="card stat"><span class="label">Gabaritos corrigidos</span><span class="num">{{ stats.attempts }}</span><span class="delta">com a câmera</span></div>
+</div>
+
+<div class="grid-2" style="margin-top:24px">
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+      <h3 style="margin:0">Suas provas recentes</h3>
+      <a href="{{ url_for('exams_bank') }}" style="font-size:13px">Ver todas →</a>
+    </div>
+    {% if recent_exams %}
+      <table class="tbl">
+        <thead><tr><th>Título</th><th>Disciplina</th><th>Criada</th><th></th></tr></thead>
+        <tbody>
+        {% for e in recent_exams %}
+          <tr><td>{{ e.title }}</td><td>{{ e.subject or '—' }}</td>
+              <td>{{ e.created_at.strftime('%d/%m/%Y') }}</td>
+              <td><a class="btn btn-sm" href="{{ url_for('exam_edit', eid=e.id) }}">Abrir</a></td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="empty"><div class="em-ic">📝</div>Nenhuma prova ainda. <a href="{{ url_for('exam_new') }}">Criar a primeira</a>.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+      <h3 style="margin:0">Atividade da turma</h3>
+      <span class="badge">últimos dias</span>
+    </div>
+    <canvas id="activity" height="180"></canvas>
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px">
+    <h3 style="margin:0">Novidades da biblioteca</h3>
+    <a href="{{ url_for('library') }}" style="font-size:13px">Explorar →</a>
+  </div>
+  {% if recent_contents %}
+    <div class="content-grid">
+    {% for c in recent_contents %}
+      <a href="{{ url_for('content_detail', cid=c.id) }}" class="content-card">
+        <div class="cc-thumb">{{ {'PDF':'📄','Slide':'🖼️','Vídeo':'🎬','Imagem':'🌄','Mapa mental':'🧠','Plano de aula':'📋','Exercícios':'✍️','Resumo':'📝'}.get(c.kind,'📁') }}<span class="cc-kind">{{ c.kind or 'Material' }}</span></div>
+        <div class="cc-body"><h4>{{ c.title }}</h4><div class="cc-meta">{{ c.subject or '' }} · {{ c.grade or '' }}</div></div>
+        <div class="cc-foot"><span style="color:var(--muted)">por {{ c.author.name }}</span><span>⬇ {{ c.downloads }}</span></div>
+      </a>
+    {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty"><div class="em-ic">📚</div>Ainda não há materiais. <a href="{{ url_for('library_upload') }}">Publique o primeiro</a>.</div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const ctx = document.getElementById('activity');
+new Chart(ctx, {type:'line',
+  data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],
+        datasets:[{label:'Correções', data:[3,8,5,11,7,2,4],
+          borderColor:'#2563eb', backgroundColor:'rgba(37,99,235,.12)',
+          tension:.35, fill:true, borderWidth:2, pointRadius:3}]},
+  options:{plugins:{legend:{display:false}},
+           scales:{y:{beginAtZero:true,ticks:{precision:0}}}}
+});
+</script>
+{% endblock %}

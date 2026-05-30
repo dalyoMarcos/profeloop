@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block body %}
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo"><span class="logo-mark">P</span> ProfeLoop</a>
+    <div class="nav-links">
+      <a href="#features">Recursos</a>
+      <a href="#how">Como funciona</a>
+      <a href="#price">Para professores</a>
+      <a href="{{ url_for('login') }}">Entrar</a>
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-sm">Criar conta grátis</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero container">
+  <span class="eyebrow">● Novo · Correção automática por foto</span>
+  <h1>Ensinar, compartilhar e evoluir<br>em um ciclo contínuo.</h1>
+  <p>A plataforma colaborativa que ajuda professores a criar provas, corrigir gabaritos em segundos e compartilhar materiais de aula com milhares de colegas.</p>
+  <div class="hero-ctas">
+    <a href="{{ url_for('register') }}" class="btn btn-primary">Começar grátis →</a>
+    <a href="#features" class="btn">Ver recursos</a>
+  </div>
+  <div class="hero-img">
+    <svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">
+      <defs><linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="#dbeafe"/><stop offset="1" stop-color="#eff6ff"/></linearGradient></defs>
+      <rect width="1100" height="520" rx="16" fill="url(#g)"/>
+      <rect x="40" y="40" width="220" height="440" rx="14" fill="#fff"/>
+      <rect x="60" y="70" width="140" height="14" rx="4" fill="#2563eb"/>
+      <rect x="60" y="100" width="180" height="10" rx="4" fill="#cbd5e1"/>
+      <rect x="60" y="120" width="160" height="10" rx="4" fill="#cbd5e1"/>
+      <rect x="60" y="160" width="180" height="38" rx="8" fill="#eff6ff"/>
+      <rect x="60" y="210" width="180" height="38" rx="8" fill="#f1f5f9"/>
+      <rect x="60" y="260" width="180" height="38" rx="8" fill="#f1f5f9"/>
+      <rect x="280" y="40" width="780" height="120" rx="14" fill="#fff"/>
+      <rect x="300" y="60" width="200" height="14" rx="4" fill="#0f172a"/>
+      <rect x="300" y="84" width="320" height="10" rx="4" fill="#cbd5e1"/>
+      <rect x="300" y="110" width="120" height="30" rx="6" fill="#2563eb"/>
+      <rect x="280" y="180" width="380" height="300" rx="14" fill="#fff"/>
+      <rect x="680" y="180" width="380" height="145" rx="14" fill="#fff"/>
+      <rect x="680" y="335" width="380" height="145" rx="14" fill="#fff"/>
+      <rect x="300" y="200" width="160" height="12" rx="4" fill="#2563eb"/>
+      <rect x="300" y="230" width="340" height="220" rx="8" fill="#eff6ff"/>
+      <circle cx="900" cy="240" r="34" fill="#2563eb"/>
+      <text x="900" y="248" text-anchor="middle" font-family="Inter" font-size="22" font-weight="800" fill="#fff">QR</text>
+    </svg>
+  </div>
+</header>
+
+<section class="block" id="features">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Tudo em um só lugar</span>
+      <h2>Menos burocracia. Mais ensino.</h2>
+      <p>Da criação da prova ao relatório da turma — sem planilhas, sem retrabalho.</p>
+    </div>
+    <div class="grid-3">
+      <div class="feature"><div class="icon">✍️</div><h3>Criação de provas</h3><p>Objetivas, V/F e dissertativas com alternativas dinâmicas e geração de múltiplas versões embaralhadas.</p></div>
+      <div class="feature"><div class="icon">📄</div><h3>PDF profissional</h3><p>Layout pronto para impressão, gabarito OMR e QR Code de correção em cada versão.</p></div>
+      <div class="feature"><div class="icon">📸</div><h3>Correção por foto</h3><p>Tire uma foto do gabarito pelo celular e veja acertos, erros e nota na hora.</p></div>
+      <div class="feature"><div class="icon">📚</div><h3>Biblioteca colaborativa</h3><p>Compartilhe slides, planos, exercícios e resumos. Curta, comente e avalie materiais de colegas.</p></div>
+      <div class="feature"><div class="icon">📊</div><h3>Relatórios inteligentes</h3><p>Questões mais erradas, desempenho da turma e médias — atualizados a cada correção.</p></div>
+      <div class="feature"><div class="icon">🗂️</div><h3>Banco de provas</h3><p>Reutilize, edite e duplique provas criadas. Sua história pedagógica organizada.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="how" style="background:#fff">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Como funciona</span>
+      <h2>Em 3 passos.</h2>
+    </div>
+    <div class="grid-3">
+      <div class="feature"><div class="icon">1</div><h3>Crie sua prova</h3><p>Monte questões em minutos e gere quantas versões precisar.</p></div>
+      <div class="feature"><div class="icon">2</div><h3>Aplique e fotografe</h3><p>Imprima, aplique e fotografe os gabaritos com o celular.</p></div>
+      <div class="feature"><div class="icon">3</div><h3>Veja os resultados</h3><p>Notas e relatórios são gerados automaticamente.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="cta-band">
+      <h2>Junte-se à comunidade ProfeLoop.</h2>
+      <p>Grátis para começar. Sem cartão de crédito.</p>
+      <a class="btn" href="{{ url_for('register') }}">Criar conta agora →</a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="container">© {{ 2025 }} ProfeLoop — Ensinar, compartilhar e evoluir.</div></footer>
+{% endblock %}

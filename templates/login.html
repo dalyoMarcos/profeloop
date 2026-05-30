@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="auth-wrap">
+  <aside class="side">
+    <a href="/" class="logo" style="color:#fff"><span class="logo-mark" style="background:#fff;color:#2563eb">P</span> ProfeLoop</a>
+    <div>
+      <h2>Bem-vindo de volta.</h2>
+      <p>Acesse sua biblioteca, suas provas e relatórios. Continue de onde parou.</p>
+    </div>
+    <p style="opacity:.7;font-size:13px">Conta demo: demo@profeloop.com / demo1234</p>
+  </aside>
+  <main class="auth-card">
+    <form method="post">
+      <h1>Entrar</h1>
+      <p class="sub">Use seu e-mail e senha.</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat,msg in messages %}<div class="flash {{cat}}">{{msg}}</div>{% endfor %}
+      {% endwith %}
+      <label>E-mail</label><input type="email" name="email" required>
+      <label>Senha</label><input type="password" name="password" required>
+      <button class="btn btn-primary btn-block" style="margin-top:18px">Entrar</button>
+      <p style="margin-top:16px;font-size:14px;text-align:center;color:var(--muted)">
+        Não tem conta? <a href="{{ url_for('register') }}">Criar agora</a>
+      </p>
+    </form>
+  </main>
+</div>
+{% endblock %}

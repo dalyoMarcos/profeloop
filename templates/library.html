@@ -1,0 +1,58 @@
+{% extends "_shell.html" %}
+{% block title %}Biblioteca · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>📚 Biblioteca de Conteúdos</h1><p>Compartilhe e descubra materiais criados por professores.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('library_upload') }}">📤 Publicar material</a>
+</div>
+
+<form class="filters card" method="get">
+  <div class="field search"><label>Buscar</label>
+    <input name="q" value="{{ filters.q }}" placeholder="Título, descrição ou tag…"></div>
+  <div class="field"><label>Disciplina</label>
+    <select name="subject"><option value="">Todas</option>
+    {% for s in subjects %}<option {% if filters.subject==s %}selected{% endif %}>{{s}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Série</label>
+    <select name="grade"><option value="">Todas</option>
+    {% for g in grades %}<option {% if filters.grade==g %}selected{% endif %}>{{g}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Tipo</label>
+    <select name="kind"><option value="">Todos</option>
+    {% for k in kinds %}<option {% if filters.kind==k %}selected{% endif %}>{{k}}</option>{% endfor %}</select></div>
+  <div class="field"><label>Ordenar</label>
+    <select name="sort">
+      <option value="recent" {% if filters.sort=='recent' %}selected{% endif %}>Mais recentes</option>
+      <option value="popular" {% if filters.sort=='popular' %}selected{% endif %}>Mais populares</option>
+    </select></div>
+  <button class="btn btn-primary">Filtrar</button>
+</form>
+
+{% if contents %}
+<div class="content-grid" style="margin-top:20px">
+  {% for c in contents %}
+  <div class="content-card">
+    <a href="{{ url_for('content_detail', cid=c.id) }}" class="cc-thumb" style="color:inherit">
+      {{ {'PDF':'📄','Slide':'🖼️','Vídeo':'🎬','Imagem':'🌄','Mapa mental':'🧠','Plano de aula':'📋','Exercícios':'✍️','Resumo':'📝'}.get(c.kind,'📁') }}
+      <span class="cc-kind">{{ c.kind or 'Material' }}</span>
+    </a>
+    <div class="cc-body">
+      <a href="{{ url_for('content_detail', cid=c.id) }}" style="color:inherit"><h4>{{ c.title }}</h4></a>
+      <div class="cc-meta">{{ c.subject or '' }} {% if c.grade %}· {{ c.grade }}{% endif %}</div>
+      <div class="cc-meta">por <b>{{ c.author.name }}</b> · {{ c.created_at.strftime('%d/%m/%Y') }}</div>
+    </div>
+    <div class="cc-foot">
+      <div style="display:flex;gap:4px">
+        <button class="icon-btn like {% if c.id in like_ids %}active{% endif %}" data-id="{{c.id}}">❤ <span>{{ c.likes|length }}</span></button>
+        <button class="icon-btn fav {% if c.id in fav_ids %}active{% endif %}" data-id="{{c.id}}">★</button>
+      </div>
+      <a class="btn btn-sm btn-primary" href="{{ url_for('content_download', cid=c.id) }}">⬇ Baixar</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+  <div class="card empty"><div class="em-ic">🔍</div>Nenhum conteúdo encontrado. <a href="{{ url_for('library_upload') }}">Publicar o primeiro</a>.</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/library.js') }}"></script>
+{% endblock %}

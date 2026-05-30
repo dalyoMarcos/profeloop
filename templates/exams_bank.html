@@ -1,0 +1,36 @@
+{% extends "_shell.html" %}
+{% block title %}Banco de Provas · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>📝 Banco de Provas</h1><p>Edite, duplique ou reutilize suas provas.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('exam_new') }}">➕ Nova prova</a>
+</div>
+
+{% if exams %}
+<table class="tbl">
+  <thead><tr><th>Título</th><th>Disciplina</th><th>Série</th><th>Versões</th><th>Criada</th><th></th></tr></thead>
+  <tbody>
+  {% for e in exams %}
+    <tr>
+      <td><b>{{ e.title }}</b></td>
+      <td>{{ e.subject or '—' }}</td>
+      <td>{{ e.grade or '—' }}</td>
+      <td><span class="badge">{{ e.versions|length }} versões</span></td>
+      <td>{{ e.created_at.strftime('%d/%m/%Y') }}</td>
+      <td style="display:flex;gap:6px">
+        <a class="btn btn-sm" href="{{ url_for('exam_edit', eid=e.id) }}">✏️ Editar</a>
+        <a class="btn btn-sm" href="{{ url_for('exam_versions', eid=e.id) }}">📄 Versões</a>
+        <form method="post" action="{{ url_for('exam_duplicate', eid=e.id) }}" style="display:inline">
+          <button class="btn btn-sm">📋 Duplicar</button></form>
+        <form method="post" action="{{ url_for('exam_delete', eid=e.id) }}" style="display:inline"
+              onsubmit="return confirm('Excluir esta prova?')">
+          <button class="btn btn-sm btn-danger">🗑</button></form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="card empty"><div class="em-ic">📝</div>Você ainda não criou provas. <a href="{{ url_for('exam_new') }}">Criar a primeira</a>.</div>
+{% endif %}
+{% endblock %}

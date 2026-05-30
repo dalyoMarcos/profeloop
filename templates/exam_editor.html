@@ -1,0 +1,70 @@
+{% extends "_shell.html" %}
+{% block title %}Editor de Prova · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>{% if exam %}✏️ Editar prova{% else %}➕ Nova prova{% endif %}</h1>
+    <p>Monte questões, salve e gere versões embaralhadas.</p></div>
+  <div style="display:flex;gap:10px">
+    <a class="btn" href="{{ url_for('exams_bank') }}">Voltar</a>
+    <button class="btn btn-primary" id="save-btn">💾 Salvar</button>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:18px">
+  <div class="grid-2">
+    <div><label>Título *</label>
+      <input id="title" value="{{ exam.title if exam else '' }}" placeholder="Ex: Avaliação Bimestral - Funções"></div>
+    <div><label>Disciplina</label>
+      <input id="subject" value="{{ exam.subject if exam else '' }}"></div>
+  </div>
+  <div class="grid-2">
+    <div><label>Série / Turma</label>
+      <input id="grade" value="{{ exam.grade if exam else '' }}"></div>
+    <div><label>Instruções para o aluno</label>
+      <input id="instructions" value="{{ exam.instructions if exam else '' }}"></div>
+  </div>
+  <div style="margin-top:10px">
+    <label>Layout da prova</label>
+    <div style="display:flex;gap:18px;margin-top:6px">
+      <label style="display:flex;align-items:center;gap:6px;font-weight:normal">
+        <input type="radio" name="layout" value="single"
+          {% if not exam or (exam.layout or 'single') == 'single' %}checked{% endif %}>
+        Coluna única
+      </label>
+      <label style="display:flex;align-items:center;gap:6px;font-weight:normal">
+        <input type="radio" name="layout" value="double"
+          {% if exam and exam.layout == 'double' %}checked{% endif %}>
+        Duas colunas
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-add="objective">➕ Objetiva</button>
+  <button class="tab" data-add="tf">➕ Verdadeiro / Falso</button>
+  <button class="tab" data-add="subjective">➕ Subjetiva</button>
+</div>
+
+<div id="questions"></div>
+
+{% if exam %}
+<form method="post" action="{{ url_for('exam_generate', eid=exam.id) }}" class="card" style="margin-top:18px">
+  <h3 style="margin-top:0">🔀 Gerar versões embaralhadas</h3>
+  <p style="color:var(--muted)">As questões e alternativas serão embaralhadas mantendo as respostas corretas.</p>
+  <label>Quantidade de versões</label>
+  <input type="number" name="versions" min="1" max="10" value="2" style="max-width:120px">
+  <button class="btn btn-primary" style="margin-top:14px">Gerar versões e PDFs</button>
+</form>
+{% else %}
+<p style="color:var(--muted);margin-top:12px">Salve a prova para gerar versões e PDFs.</p>
+{% endif %}
+
+<script>
+window.EXAM_ID = {{ exam.id if exam else 'null' }};
+window.QUESTIONS = {{ (exam.questions_json if exam else '[]')|safe }};
+</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/exam_editor.js') }}"></script>
+{% endblock %}

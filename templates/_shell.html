@@ -1,0 +1,33 @@
+{# Shell autenticado com sidebar #}
+{% extends "base.html" %}
+{% block body %}
+<div class="app">
+  <aside class="sidebar">
+    <a href="{{ url_for('dashboard') }}" class="logo"><span class="logo-mark">P</span> ProfeLoop</a>
+    <div class="side-section">Principal</div>
+    <a href="{{ url_for('dashboard') }}" class="side-link {% if request.endpoint=='dashboard' %}active{% endif %}"><span class="ic">🏠</span> Dashboard</a>
+    <a href="{{ url_for('library') }}" class="side-link {% if 'library' in request.endpoint or 'content' in request.endpoint %}active{% endif %}"><span class="ic">📚</span> Biblioteca</a>
+    <a href="{{ url_for('exams_bank') }}" class="side-link {% if 'exam' in request.endpoint %}active{% endif %}"><span class="ic">📝</span> Provas</a>
+    <a href="{{ url_for('exam_new') }}" class="side-link"><span class="ic">➕</span> Criar prova</a>
+    <a href="{{ url_for('scan_page') }}" class="side-link {% if request.endpoint=='scan_page' %}active{% endif %}"><span class="ic">📸</span> Escanear gabarito</a>
+    <a href="{{ url_for('reports') }}" class="side-link {% if 'report' in request.endpoint %}active{% endif %}"><span class="ic">📊</span> Relatórios</a>
+    <div class="side-section">Conta</div>
+    <a href="{{ url_for('profile') }}" class="side-link {% if request.endpoint=='profile' %}active{% endif %}"><span class="ic">👤</span> Meu perfil</a>
+    <a href="{{ url_for('logout') }}" class="side-link"><span class="ic">↩</span> Sair</a>
+    <div class="side-user">
+      <div class="avatar">{{ current_user.name[:1]|upper }}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ current_user.name }}</div>
+        <div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ current_user.email }}</div>
+      </div>
+    </div>
+  </aside>
+  <main class="main">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat,msg in messages %}<div class="flash {{cat}}">{{msg}}</div>{% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+{% block scripts %}{% endblock %}
+{% endblock %}

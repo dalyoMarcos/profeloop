@@ -1,0 +1,47 @@
+{% extends "_shell.html" %}
+{% block title %}Escanear gabarito · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>📸 Escanear gabarito</h1>
+  <p>Fotografe a folha de respostas com os 4 marcadores pretos dos cantos
+  bem visíveis. O sistema corrige a inclinação, identifica a versão e
+  calcula a nota automaticamente.</p></div></div>
+
+{% if not exams %}
+<div class="card empty"><div class="em-ic">📄</div>
+  Nenhuma prova com versões geradas. Crie uma prova, gere as versões e volte aqui.</div>
+{% else %}
+<div class="grid-2">
+  <div class="card">
+    <label>Prova</label>
+    <select id="exam">
+      {% for e in exams %}
+      <option value="{{ e.id }}">{{ e.title }}{% if e.subject %} — {{ e.subject }}{% endif %}</option>
+      {% endfor %}
+    </select>
+
+    <label style="margin-top:12px">Nome do aluno (opcional)</label>
+    <input id="student" placeholder="Ex: Maria Silva">
+
+    <div style="margin-top:14px">
+      <video id="video" autoplay playsinline></video>
+      <canvas id="snapshot" style="display:none"></canvas>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+      <button id="start" class="btn btn-primary">📷 Ligar câmera</button>
+      <button id="capture" class="btn" disabled>📸 Capturar</button>
+      <label class="btn" style="cursor:pointer">📁 Enviar imagem
+        <input id="file" type="file" accept="image/*" style="display:none"></label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Resultado</h3>
+    <div id="result"><div class="empty"><div class="em-ic">⏳</div>Aguardando captura…</div></div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/scan.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "_shell.html" %}
+{% block title %}Relatórios · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar"><div><h1>📊 Relatórios</h1>
+  <p>Desempenho das suas provas, atualizado a cada correção.</p></div></div>
+
+{% if data %}
+<div class="grid-2" style="margin-bottom:24px">
+  <div class="card"><h3 style="margin-top:0">Provas vs correções</h3><canvas id="ch1" height="200"></canvas></div>
+  <div class="card"><h3 style="margin-top:0">Média geral por prova</h3><canvas id="ch2" height="200"></canvas></div>
+</div>
+
+<table class="tbl">
+  <thead><tr><th>Prova</th><th>Correções</th><th>Média</th><th></th></tr></thead>
+  <tbody>
+  {% for d in data %}
+    <tr>
+      <td>{{ d.title }}</td>
+      <td>{{ d.attempts }}</td>
+      <td>{{ d.avg }}/10</td>
+      <td></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+window.REPORT = {{ data|tojson }};
+</script>
+{% else %}
+<div class="card empty"><div class="em-ic">📊</div>Sem dados ainda. Crie uma prova e corrija gabaritos.</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+if(window.REPORT){
+  const labels=REPORT.map(r=>r.title), att=REPORT.map(r=>r.attempts), avg=REPORT.map(r=>r.avg);
+  new Chart(ch1,{type:'bar',data:{labels,datasets:[{label:'Correções',data:att,backgroundColor:'#2563eb'}]},options:{plugins:{legend:{display:false}}}});
+  new Chart(ch2,{type:'line',data:{labels,datasets:[{label:'Média',data:avg,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,.15)',fill:true,tension:.3}]},options:{plugins:{legend:{display:false}},scales:{y:{min:0,max:10}}}});
+}
+</script>
+{% endblock %}
