@@ -1,0 +1,82 @@
+{% extends "_shell.html" %}
+{% block title %}Correções · ProfeLoop{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h1>✅ Correções</h1>
+    <p>Histórico de todas as provas corrigidas por escaneamento OMR.</p></div>
+</div>
+
+{# ── Filtros ── #}
+<form method="get" class="card" style="margin-bottom:16px">
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end">
+    <div style="flex:2;min-width:180px">
+      <label>Buscar aluno</label>
+      <input name="q" value="{{ filters.q }}" placeholder="Nome do aluno…">
+    </div>
+    <div style="flex:1;min-width:140px">
+      <label>Turma</label>
+      <select name="turma">
+        <option value="">Todas</option>
+        {% for t in turmas %}
+        <option value="{{ t }}" {% if filters.turma == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="flex:1;min-width:140px">
+      <label>Ordenar por</label>
+      <select name="sort">
+        <option value="date"  {% if filters.sort=='date'  %}selected{% endif %}>Data (recente)</option>
+        <option value="score" {% if filters.sort=='score' %}selected{% endif %}>Nota (maior)</option>
+        <option value="name"  {% if filters.sort=='name'  %}selected{% endif %}>Nome</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" type="submit">🔍 Filtrar</button>
+    <a href="{{ url_for('corrections') }}" class="btn">Limpar</a>
+  </div>
+</form>
+
+{% if not rows %}
+<div class="card empty"><div class="em-ic">📋</div>
+  Nenhuma correção encontrada. Escaneie um gabarito para começar.</div>
+{% else %}
+<div class="card" style="padding:0;overflow:hidden">
+  <table class="tbl" style="margin:0">
+    <thead>
+      <tr>
+        <th>Aluno</th>
+        <th>Turma</th>
+        <th>Prova</th>
+        <th>Versão</th>
+        <th style="text-align:center">Acertos</th>
+        <th style="text-align:center">Erros</th>
+        <th style="text-align:center">Nota</th>
+        <th style="text-align:right">Data</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for attempt, ver, exam in rows %}
+      <tr>
+        <td>{{ attempt.student_name or '—' }}</td>
+        <td>{{ attempt.turma or '—' }}</td>
+        <td>{{ exam.title }}</td>
+        <td><span class="badge">{{ ver.label }}</span></td>
+        <td style="text-align:center;color:var(--ok)"><b>{{ attempt.correct_count or 0 }}</b></td>
+        <td style="text-align:center;color:var(--err)">{{ (attempt.total or 0) - (attempt.correct_count or 0) }}</td>
+        <td style="text-align:center">
+          <b style="font-size:15px;color:{% if (attempt.score or 0) >= 7 %}var(--ok){% elif (attempt.score or 0) >= 5 %}var(--warn){% else %}var(--err){% endif %}">
+            {{ '%.2f'|format(attempt.score or 0) }}
+          </b>
+        </td>
+        <td style="text-align:right;color:var(--muted);font-size:12px">
+          {{ attempt.created_at.strftime('%d/%m/%Y %H:%M') }}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p style="color:var(--muted);font-size:13px;margin-top:10px">
+  {{ rows|length }} correção(ões) encontrada(s).
+</p>
+{% endif %}
+{% endblock %}

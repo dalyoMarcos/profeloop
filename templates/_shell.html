@@ -10,6 +10,7 @@
     <a href="{{ url_for('exams_bank') }}" class="side-link {% if 'exam' in request.endpoint %}active{% endif %}"><span class="ic">📝</span> Provas</a>
     <a href="{{ url_for('exam_new') }}" class="side-link"><span class="ic">➕</span> Criar prova</a>
     <a href="{{ url_for('scan_page') }}" class="side-link {% if request.endpoint=='scan_page' %}active{% endif %}"><span class="ic">📸</span> Escanear gabarito</a>
+    <a href="{{ url_for('corrections') }}" class="side-link {% if request.endpoint=='corrections' %}active{% endif %}"><span class="ic">✅</span> Correções</a>
     <a href="{{ url_for('reports') }}" class="side-link {% if 'report' in request.endpoint %}active{% endif %}"><span class="ic">📊</span> Relatórios</a>
     <div class="side-section">Conta</div>
     <a href="{{ url_for('profile') }}" class="side-link {% if request.endpoint=='profile' %}active{% endif %}"><span class="ic">👤</span> Meu perfil</a>

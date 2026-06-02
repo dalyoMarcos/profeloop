@@ -17,7 +17,7 @@ from models import (
 from pdf_utils import build_exam_pdf
 from omr_utils import detect_answers, grade_against_key, best_version_match
 
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE       = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE, "static", "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(os.path.join(BASE, "instance"), exist_ok=True)
@@ -27,8 +27,12 @@ app.config.update(
     SECRET_KEY=os.environ.get("PROFELOOP_SECRET", "dev-secret-change-me"),
     SQLALCHEMY_DATABASE_URI="sqlite:///" + os.path.join(BASE, "instance", "profeloop.db"),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
-    MAX_CONTENT_LENGTH=64 * 1024 * 1024,  # 64MB
+    MAX_CONTENT_LENGTH=64 * 1024 * 1024,
 )
+
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -40,35 +44,32 @@ def load_user(uid):
     return db.session.get(User, int(uid))
 
 
-ALLOWED = {"pdf", "png", "jpg", "jpeg", "gif", "webp", "mp4", "webm", "mov",
-           "ppt", "pptx", "doc", "docx", "odt", "odp", "txt", "md", "zip"}
-KINDS = ["Slide", "PDF", "Mapa mental", "Vídeo", "Imagem", "Plano de aula",
-         "Exercícios", "Resumo"]
-SUBJECTS = ["Matemática", "Português", "História", "Geografia", "Biologia",
-            "Física", "Química", "Inglês", "Filosofia", "Sociologia", "Artes",
-            "Ed. Física", "Outro"]
-GRADES = ["6º ano", "7º ano", "8º ano", "9º ano",
-          "1ª série EM", "2ª série EM", "3ª série EM", "Outro"]
+ALLOWED  = {"pdf","png","jpg","jpeg","gif","webp","mp4","webm","mov",
+            "ppt","pptx","doc","docx","odt","odp","txt","md","zip"}
+KINDS    = ["Slide","PDF","Mapa mental","Vídeo","Imagem","Plano de aula","Exercícios","Resumo"]
+SUBJECTS = ["Matemática","Português","História","Geografia","Biologia","Física","Química",
+            "Inglês","Filosofia","Sociologia","Artes","Ed. Física","Outro"]
+GRADES   = ["6º ano","7º ano","8º ano","9º ano","1ª série EM","2ª série EM","3ª série EM","Outro"]
 
 
 def allowed_file(name):
     return "." in name and name.rsplit(".", 1)[1].lower() in ALLOWED
 
 
-# ---------- Public ---------- #
+# ── Public ────────────────────────────────────────────────────────────────────
 
 @app.route("/")
 def landing():
     return render_template("landing.html")
 
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route("/login", methods=["GET","POST"])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
     if request.method == "POST":
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
+        email    = request.form.get("email","").strip().lower()
+        password = request.form.get("password","")
         u = User.query.filter_by(email=email).first()
         if u and u.check_password(password):
             login_user(u, remember=True)
@@ -77,12 +78,12 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["GET","POST"])
 def register():
     if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
+        name     = request.form.get("name","").strip()
+        email    = request.form.get("email","").strip().lower()
+        password = request.form.get("password","")
         if not (name and email and len(password) >= 6):
             flash("Preencha todos os campos (senha com 6+ caracteres).", "error")
             return render_template("register.html")
@@ -105,18 +106,18 @@ def logout():
     return redirect(url_for("landing"))
 
 
-# ---------- Dashboard ---------- #
+# ── Dashboard ─────────────────────────────────────────────────────────────────
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    exams_count = Exam.query.filter_by(user_id=current_user.id).count()
+    exams_count    = Exam.query.filter_by(user_id=current_user.id).count()
     contents_count = Content.query.filter_by(user_id=current_user.id).count()
-    downloads = db.session.query(func.coalesce(func.sum(Content.downloads), 0))\
+    downloads      = db.session.query(func.coalesce(func.sum(Content.downloads), 0))\
         .filter(Content.user_id == current_user.id).scalar() or 0
     attempts_count = db.session.query(Attempt).join(ExamVersion).join(Exam)\
         .filter(Exam.user_id == current_user.id).count()
-    recent_exams = Exam.query.filter_by(user_id=current_user.id)\
+    recent_exams    = Exam.query.filter_by(user_id=current_user.id)\
         .order_by(Exam.created_at.desc()).limit(5).all()
     recent_contents = Content.query.order_by(Content.created_at.desc()).limit(6).all()
     return render_template("dashboard.html",
@@ -125,55 +126,50 @@ def dashboard():
         recent_exams=recent_exams, recent_contents=recent_contents)
 
 
-@app.route("/profile", methods=["GET", "POST"])
+@app.route("/profile", methods=["GET","POST"])
 @login_required
 def profile():
     if request.method == "POST":
-        current_user.name = request.form.get("name", current_user.name)
-        current_user.school = request.form.get("school")
+        current_user.name    = request.form.get("name", current_user.name)
+        current_user.school  = request.form.get("school")
         current_user.subject = request.form.get("subject")
-        current_user.bio = request.form.get("bio")
+        current_user.bio     = request.form.get("bio")
         db.session.commit()
         flash("Perfil atualizado.", "success")
         return redirect(url_for("profile"))
     return render_template("profile.html", subjects=SUBJECTS)
 
 
-# ---------- Biblioteca ---------- #
+# ── Biblioteca ────────────────────────────────────────────────────────────────
 
 @app.route("/library")
 @login_required
 def library():
-    q = request.args.get("q", "").strip()
-    subject = request.args.get("subject", "")
-    grade_f = request.args.get("grade", "")
-    kind = request.args.get("kind", "")
-    sort = request.args.get("sort", "recent")
-
-    query = Content.query
+    q       = request.args.get("q","").strip()
+    subject = request.args.get("subject","")
+    grade_f = request.args.get("grade","")
+    kind    = request.args.get("kind","")
+    sort    = request.args.get("sort","recent")
+    query   = Content.query
     if q:
-        like = f"%{q}%"
+        like  = f"%{q}%"
         query = query.filter(or_(Content.title.ilike(like),
                                  Content.description.ilike(like),
                                  Content.tags.ilike(like)))
     if subject: query = query.filter(Content.subject == subject)
     if grade_f: query = query.filter(Content.grade == grade_f)
     if kind:    query = query.filter(Content.kind == kind)
-    if sort == "popular":
-        query = query.order_by(Content.downloads.desc())
-    else:
-        query = query.order_by(Content.created_at.desc())
-
-    fav_ids = {f.content_id for f in Favorite.query.filter_by(user_id=current_user.id)}
+    query = query.order_by(Content.downloads.desc() if sort == "popular"
+                           else Content.created_at.desc())
+    fav_ids  = {f.content_id for f in Favorite.query.filter_by(user_id=current_user.id)}
     like_ids = {l.content_id for l in Like.query.filter_by(user_id=current_user.id)}
-
     return render_template("library.html", contents=query.all(),
         subjects=SUBJECTS, grades=GRADES, kinds=KINDS,
         filters=dict(q=q, subject=subject, grade=grade_f, kind=kind, sort=sort),
         fav_ids=fav_ids, like_ids=like_ids)
 
 
-@app.route("/library/upload", methods=["GET", "POST"])
+@app.route("/library/upload", methods=["GET","POST"])
 @login_required
 def library_upload():
     if request.method == "POST":
@@ -183,25 +179,22 @@ def library_upload():
             return redirect(url_for("library_upload"))
         fname = secure_filename(f"{int(datetime.utcnow().timestamp())}_{f.filename}")
         f.save(os.path.join(UPLOAD_DIR, fname))
-        c = Content(
-            title=request.form["title"], description=request.form.get("description"),
-            subject=request.form.get("subject"), grade=request.form.get("grade"),
-            kind=request.form.get("kind"), tags=request.form.get("tags"),
-            filename=fname, user_id=current_user.id,
-        )
+        c = Content(title=request.form["title"], description=request.form.get("description"),
+                    subject=request.form.get("subject"), grade=request.form.get("grade"),
+                    kind=request.form.get("kind"), tags=request.form.get("tags"),
+                    filename=fname, user_id=current_user.id)
         db.session.add(c); db.session.commit()
         flash("Conteúdo publicado!", "success")
         return redirect(url_for("library"))
-    return render_template("library_upload.html",
-        subjects=SUBJECTS, grades=GRADES, kinds=KINDS)
+    return render_template("library_upload.html", subjects=SUBJECTS, grades=GRADES, kinds=KINDS)
 
 
 @app.route("/library/<int:cid>")
 @login_required
 def content_detail(cid):
-    c = db.session.get(Content, cid) or abort(404)
-    is_fav = bool(Favorite.query.filter_by(user_id=current_user.id, content_id=cid).first())
-    is_like = bool(Like.query.filter_by(user_id=current_user.id, content_id=cid).first())
+    c         = db.session.get(Content, cid) or abort(404)
+    is_fav    = bool(Favorite.query.filter_by(user_id=current_user.id, content_id=cid).first())
+    is_like   = bool(Like.query.filter_by(user_id=current_user.id, content_id=cid).first())
     my_rating = Rating.query.filter_by(user_id=current_user.id, content_id=cid).first()
     return render_template("content_detail.html", c=c, is_fav=is_fav, is_like=is_like,
                            my_rating=my_rating.stars if my_rating else 0)
@@ -219,22 +212,21 @@ def content_download(cid):
 @app.post("/api/library/<int:cid>/like")
 @login_required
 def api_like(cid):
-    existing = Like.query.filter_by(user_id=current_user.id, content_id=cid).first()
-    if existing:
-        db.session.delete(existing); liked = False
+    ex = Like.query.filter_by(user_id=current_user.id, content_id=cid).first()
+    if ex:
+        db.session.delete(ex); liked = False
     else:
         db.session.add(Like(user_id=current_user.id, content_id=cid)); liked = True
     db.session.commit()
-    count = Like.query.filter_by(content_id=cid).count()
-    return jsonify(liked=liked, count=count)
+    return jsonify(liked=liked, count=Like.query.filter_by(content_id=cid).count())
 
 
 @app.post("/api/library/<int:cid>/favorite")
 @login_required
 def api_favorite(cid):
-    existing = Favorite.query.filter_by(user_id=current_user.id, content_id=cid).first()
-    if existing:
-        db.session.delete(existing); fav = False
+    ex = Favorite.query.filter_by(user_id=current_user.id, content_id=cid).first()
+    if ex:
+        db.session.delete(ex); fav = False
     else:
         db.session.add(Favorite(user_id=current_user.id, content_id=cid)); fav = True
     db.session.commit()
@@ -265,7 +257,7 @@ def api_comment(cid):
                    created_at=c.created_at.strftime("%d/%m/%Y %H:%M"))
 
 
-# ---------- Provas ---------- #
+# ── Provas ────────────────────────────────────────────────────────────────────
 
 @app.route("/exams")
 @login_required
@@ -293,19 +285,19 @@ def exam_edit(eid):
 @login_required
 def api_save_exam():
     data = request.json
-    eid = data.get("id")
+    eid  = data.get("id")
     if eid:
         e = db.session.get(Exam, int(eid)) or abort(404)
         if e.user_id != current_user.id: abort(403)
     else:
         e = Exam(user_id=current_user.id)
         db.session.add(e)
-    e.title = data.get("title") or "Prova sem título"
-    e.subject = data.get("subject")
-    e.grade = data.get("grade")
-    e.instructions = data.get("instructions")
-    layout = (data.get("layout") or "single").lower()
-    e.layout = layout if layout in ("single", "double") else "single"
+    e.title          = data.get("title") or "Prova sem título"
+    e.subject        = data.get("subject")
+    e.grade          = data.get("grade")
+    e.instructions   = data.get("instructions")
+    layout           = (data.get("layout") or "single").lower()
+    e.layout         = layout if layout in ("single","double") else "single"
     e.questions_json = json.dumps(data.get("questions") or [], ensure_ascii=False)
     db.session.commit()
     return jsonify(id=e.id)
@@ -316,7 +308,7 @@ def api_save_exam():
 def exam_duplicate(eid):
     e = db.session.get(Exam, eid) or abort(404)
     if e.user_id != current_user.id: abort(403)
-    copy = Exam(title=e.title + " (cópia)", subject=e.subject, grade=e.grade,
+    copy = Exam(title=e.title+" (cópia)", subject=e.subject, grade=e.grade,
                 instructions=e.instructions, layout=e.layout,
                 questions_json=e.questions_json, user_id=current_user.id)
     db.session.add(copy); db.session.commit()
@@ -335,19 +327,15 @@ def exam_delete(eid):
 @app.post("/exams/<int:eid>/generate")
 @login_required
 def exam_generate(eid):
-    """Gera N versões embaralhadas."""
     e = db.session.get(Exam, eid) or abort(404)
     if e.user_id != current_user.id: abort(403)
     n = max(1, min(10, int(request.form.get("versions", 2))))
-    # zera versões anteriores
     ExamVersion.query.filter_by(exam_id=e.id).delete()
     db.session.commit()
-
-    base = json.loads(e.questions_json)
+    base   = json.loads(e.questions_json)
     labels = "ABCDEFGHIJ"
     for v in range(n):
-        qs = base.copy()
-        random.shuffle(qs)
+        qs = base.copy(); random.shuffle(qs)
         payload = []
         for q in qs:
             item = {"type": q["type"], "statement": q["statement"]}
@@ -357,17 +345,16 @@ def exam_generate(eid):
                 random.shuffle(opts)
                 item["options"] = opts
                 item["correct_index"] = opts.index(correct_text) if correct_text in opts else 0
-                item["correct_text"] = correct_text
+                item["correct_text"]  = correct_text
             elif q["type"] == "tf":
-                item["options"] = ["Verdadeiro", "Falso"]
-                item["correct_index"] = 0 if (q.get("correct") in (True, "true", "Verdadeiro", "V")) else 1
-                item["correct_text"] = item["options"][item["correct_index"]]
+                item["options"]       = ["Verdadeiro","Falso"]
+                item["correct_index"] = 0 if q.get("correct") in (True,"true","Verdadeiro","V") else 1
+                item["correct_text"]  = item["options"][item["correct_index"]]
             else:
                 item["options"] = []
             payload.append(item)
-        ver = ExamVersion(exam_id=e.id, label=labels[v],
-                          payload_json=json.dumps(payload, ensure_ascii=False))
-        db.session.add(ver)
+        db.session.add(ExamVersion(exam_id=e.id, label=labels[v],
+                                   payload_json=json.dumps(payload, ensure_ascii=False)))
     db.session.commit()
     return redirect(url_for("exam_versions", eid=e.id))
 
@@ -390,28 +377,27 @@ def exam_version_pdf(vid):
         as_attachment=True, download_name=f"{v.exam.title}-V{v.label}.pdf")
 
 
-# ---------- Scanner ---------- #
+# ── Scanner ───────────────────────────────────────────────────────────────────
 
 @app.route("/scan")
 @login_required
 def scan_page():
-    exams = Exam.query.filter_by(user_id=current_user.id)\
-        .order_by(Exam.created_at.desc()).all()
-    # apenas provas com versões geradas
-    exams = [e for e in exams if e.versions]
+    exams = [e for e in
+             Exam.query.filter_by(user_id=current_user.id)
+             .order_by(Exam.created_at.desc()).all()
+             if e.versions]
     return render_template("scan.html", exams=exams)
 
 
 @app.post("/api/scan")
 @login_required
 def api_scan():
-    f = request.files.get("image")
-    student = (request.form.get("student") or "").strip()
-    exam_id = request.form.get("exam_id")
-    if not f:
-        return jsonify(error="Imagem obrigatória."), 400
-    if not exam_id:
-        return jsonify(error="Selecione a prova."), 400
+    f        = request.files.get("image")
+    student  = (request.form.get("student") or "").strip()
+    turma    = (request.form.get("turma") or "").strip()
+    exam_id  = request.form.get("exam_id")
+    if not f:       return jsonify(error="Imagem obrigatória."), 400
+    if not exam_id: return jsonify(error="Selecione a prova."), 400
 
     e = db.session.get(Exam, int(exam_id))
     if not e or e.user_id != current_user.id:
@@ -419,40 +405,95 @@ def api_scan():
     if not e.versions:
         return jsonify(error="Esta prova ainda não tem versões geradas."), 400
 
-    base_questions = json.loads(e.questions_json)
-    n = len(base_questions)
+    n   = len(json.loads(e.questions_json))
     raw = f.read()
-
     det = detect_answers(raw, n)
     if not det["ok"]:
         return jsonify(error=det["error"] or "Falha na leitura."), 400
-    detected = det["answers"]
 
-    # identifica a versão pelo melhor casamento
-    versions_payloads = [
-        (v.id, v.label, json.loads(v.payload_json)) for v in e.versions
-    ]
+    detected = det["answers"]
+    versions_payloads = [(v.id, v.label, json.loads(v.payload_json)) for v in e.versions]
     best, _hits = best_version_match(detected, versions_payloads)
     if best is None:
         return jsonify(error="Não foi possível identificar a versão."), 400
     ver_id, ver_label, correct = best
     result = grade_against_key(detected, correct)
 
-    a = Attempt(version_id=ver_id, student_name=student,
+    a = Attempt(version_id=ver_id, student_name=student, turma=turma,
                 answers_json=json.dumps(detected),
                 score=result["score"], correct_count=result["correct"],
                 total=result["total"])
     db.session.add(a); db.session.commit()
 
     return jsonify(
+        attempt_id=a.id,
         result=result,
         version={"id": ver_id, "label": ver_label},
         student=student,
+        turma=turma,
         exam={"id": e.id, "title": e.title},
     )
 
 
-# ---------- Relatórios ---------- #
+@app.post("/api/scan/save/<int:attempt_id>")
+@login_required
+def api_scan_save(attempt_id):
+    """Confirma/atualiza nome/turma de uma tentativa já salva."""
+    a = db.session.get(Attempt, attempt_id) or abort(404)
+    # Verifica que a tentativa pertence a uma versão do professor logado
+    ver = db.session.get(ExamVersion, a.version_id)
+    if not ver or ver.exam.user_id != current_user.id:
+        abort(403)
+    student = (request.json.get("student") or "").strip()
+    turma   = (request.json.get("turma")   or "").strip()
+    if student: a.student_name = student
+    if turma:   a.turma        = turma
+    db.session.commit()
+    return jsonify(ok=True, attempt_id=a.id)
+
+
+# ── Correções ─────────────────────────────────────────────────────────────────
+
+@app.route("/corrections")
+@login_required
+def corrections():
+    q     = request.args.get("q", "").strip()
+    turma = request.args.get("turma", "").strip()
+    sort  = request.args.get("sort", "date")
+
+    query = (db.session.query(Attempt, ExamVersion, Exam)
+             .join(ExamVersion, ExamVersion.id == Attempt.version_id)
+             .join(Exam,        Exam.id        == ExamVersion.exam_id)
+             .filter(Exam.user_id == current_user.id))
+
+    if q:
+        query = query.filter(Attempt.student_name.ilike(f"%{q}%"))
+    if turma:
+        query = query.filter(Attempt.turma == turma)
+
+    if sort == "score":
+        query = query.order_by(Attempt.score.desc())
+    elif sort == "name":
+        query = query.order_by(Attempt.student_name)
+    else:
+        query = query.order_by(Attempt.created_at.desc())
+
+    rows = query.all()
+
+    # Lista de turmas distintas para o filtro
+    turmas = (db.session.query(Attempt.turma)
+              .join(ExamVersion, ExamVersion.id == Attempt.version_id)
+              .join(Exam,        Exam.id        == ExamVersion.exam_id)
+              .filter(Exam.user_id == current_user.id, Attempt.turma != None,
+                      Attempt.turma != "")
+              .distinct().all())
+    turmas = sorted({t[0] for t in turmas})
+
+    return render_template("corrections.html", rows=rows, turmas=turmas,
+                           filters=dict(q=q, turma=turma, sort=sort))
+
+
+# ── Relatórios ────────────────────────────────────────────────────────────────
 
 @app.route("/reports")
 @login_required
@@ -475,24 +516,22 @@ def report_detail(eid):
     attempts = db.session.query(Attempt).join(ExamVersion)\
         .filter(ExamVersion.exam_id == e.id).all()
     base = json.loads(e.questions_json)
-    n = len(base)
-    wrong_per_q = [0] * n
+    n    = len(base)
+    wrong_per_q    = [0] * n
     total_attempts = len(attempts)
     for a in attempts:
-        marks = json.loads(a.answers_json or "[]")
-        ver = db.session.get(ExamVersion, a.version_id)
+        marks   = json.loads(a.answers_json or "[]")
+        ver     = db.session.get(ExamVersion, a.version_id)
         payload = json.loads(ver.payload_json)
         for i, q in enumerate(payload):
             if i >= n: break
-            if q["type"] in ("objective", "tf"):
-                if marks[i] != q.get("correct_index"):
-                    wrong_per_q[i] += 1
+            if q["type"] in ("objective","tf") and marks[i] != q.get("correct_index"):
+                wrong_per_q[i] += 1
     return render_template("report_detail.html", exam=e, attempts=attempts,
-        wrong_per_q=wrong_per_q, total_attempts=total_attempts,
-        questions=base)
+        wrong_per_q=wrong_per_q, total_attempts=total_attempts, questions=base)
 
 
-# ---------- bootstrap ---------- #
+# ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 def seed():
     if User.query.first(): return
@@ -504,13 +543,21 @@ def seed():
 
 
 def _migrate_sqlite():
-    """Migrações leves para bancos criados em versões anteriores."""
     from sqlalchemy import text, inspect
     insp = inspect(db.engine)
+
+    # exams.layout
     cols = [c["name"] for c in insp.get_columns("exams")]
     if "layout" not in cols:
         with db.engine.begin() as conn:
             conn.execute(text("ALTER TABLE exams ADD COLUMN layout VARCHAR(10) DEFAULT 'single'"))
+
+    # attempts.turma
+    if "attempts" in insp.get_table_names():
+        a_cols = [c["name"] for c in insp.get_columns("attempts")]
+        if "turma" not in a_cols:
+            with db.engine.begin() as conn:
+                conn.execute(text("ALTER TABLE attempts ADD COLUMN turma VARCHAR(80)"))
 
 
 with app.app_context():

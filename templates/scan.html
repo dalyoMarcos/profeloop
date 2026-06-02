@@ -2,9 +2,8 @@
 {% block title %}Escanear gabarito · ProfeLoop{% endblock %}
 {% block content %}
 <div class="topbar"><div><h1>📸 Escanear gabarito</h1>
-  <p>Fotografe a folha de respostas com os 4 marcadores pretos dos cantos
-  bem visíveis. O sistema corrige a inclinação, identifica a versão e
-  calcula a nota automaticamente.</p></div></div>
+  <p>Fotografe o gabarito OMR com os 4 marcadores dos cantos bem visíveis.
+     O sistema corrige inclinação, identifica a versão e calcula a nota.</p></div></div>
 
 {% if not exams %}
 <div class="card empty"><div class="em-ic">📄</div>
@@ -22,15 +21,18 @@
     <label style="margin-top:12px">Nome do aluno (opcional)</label>
     <input id="student" placeholder="Ex: Maria Silva">
 
+    <label style="margin-top:12px">Turma (opcional)</label>
+    <input id="turma" placeholder="Ex: 1º Ano A">
+
     <div style="margin-top:14px">
       <video id="video" autoplay playsinline></video>
       <canvas id="snapshot" style="display:none"></canvas>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
-      <button id="start" class="btn btn-primary">📷 Ligar câmera</button>
+      <button id="start"   class="btn btn-primary">📷 Ligar câmera</button>
       <button id="capture" class="btn" disabled>📸 Capturar</button>
-      <label class="btn" style="cursor:pointer">📁 Enviar imagem
+      <label  class="btn" style="cursor:pointer">📁 Enviar imagem
         <input id="file" type="file" accept="image/*" style="display:none"></label>
     </div>
   </div>

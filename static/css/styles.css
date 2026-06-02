@@ -34,6 +34,29 @@ a:hover{color:var(--brand-600)}
 .nav-links{display:flex; gap:24px; align-items:center}
 .nav-links a{color:var(--muted); font-weight:500; font-size:14px}
 .nav-links a:hover{color:var(--ink)}
+@media (max-width: 768px){
+
+    .nav-inner{
+        flex-direction: column;
+        height: auto;
+        padding: 12px 0;
+        gap: 12px;
+    }
+
+    .nav-links{
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .hero h1{
+        font-size: 42px;
+    }
+
+    .hero{
+        padding: 40px 0;
+    }
+}
 
 /* ---------- Hero ---------- */
 .hero{padding:90px 0 60px; text-align:center}
@@ -47,6 +70,29 @@ a:hover{color:var(--brand-600)}
 .hero-ctas{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
 .hero-img{margin-top:64px; border-radius:22px; box-shadow:0 30px 80px -30px rgba(37,99,235,.35),
   0 4px 12px rgba(15,23,42,.06); border:1px solid var(--line); background:#fff; padding:18px}
+  @media (max-width: 768px){
+
+    .nav-inner{
+        flex-direction: column;
+        height: auto;
+        padding: 12px 0;
+        gap: 12px;
+    }
+
+    .nav-links{
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .hero h1{
+        font-size: 42px;
+    }
+
+    .hero{
+        padding: 40px 0;
+    }
+}
 
 /* ---------- Sections ---------- */
 section.block{padding:80px 0}
